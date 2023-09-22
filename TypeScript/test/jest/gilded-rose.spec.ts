@@ -1,6 +1,10 @@
-import { Item, GildedRose } from "@/gilded-rose";
+import { Item, GildedRose, ITEM_UPDATE_STRATEGIES } from "@/gilded-rose";
 
 describe("Gilded Rose", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   describe("Regular items", () => {
     it("should lower quality", () => {
       const sut = new GildedRose([
@@ -220,5 +224,15 @@ describe("Gilded Rose", () => {
         expect(items.map((i) => i.quality)).toEqual(expectedQuality);
       }
     });
+  });
+
+  it("should throw when no matching update strategies", () => {
+    jest
+      .spyOn(ITEM_UPDATE_STRATEGIES.slice(-1)[0], "isForItem")
+      .mockReturnValue(false);
+    const sut = new GildedRose([new Item("foo", 2, 5)]);
+    expect(() => sut.updateQuality()).toThrowError(
+      /Unable to find a matching update strategy/
+    );
   });
 });

@@ -30,12 +30,12 @@ interface ItemUpdateStrategy {
 /**
  * The list of supported item update strategies.
  *
- * NOTE: The order of items in this array is important. Several
+ * IMPORTANT: The order of items in this array is important. Several
  * update strategies can return `true` from `isForItem()` for
  * the same item. The first update strategy to return `true` will
- * be used for the item.
+ * be used.
  */
-const ITEM_UPDATE_STRATEGIES: ItemUpdateStrategy[] = [
+export const ITEM_UPDATE_STRATEGIES: ItemUpdateStrategy[] = [
   // Legendary
   {
     isForItem: (item: Item): boolean => {
@@ -82,6 +82,26 @@ const ITEM_UPDATE_STRATEGIES: ItemUpdateStrategy[] = [
       }
     },
   },
+
+  // Regular items
+  {
+    isForItem: (_item: Item): boolean => {
+      return true;
+    },
+    updateItem: (item: Item): void => {
+      item.sellIn -= 1;
+
+      if (item.sellIn < 0) {
+        item.quality -= 2;
+      } else {
+        item.quality -= 1;
+      }
+
+      if (item.quality < 0) {
+        item.quality = 0;
+      }
+    },
+  },
 ];
 
 export class GildedRose {
@@ -96,21 +116,13 @@ export class GildedRose {
       const item = this.items[i];
 
       const updateStrategy = this._getUpdateStrategyForItem(item);
-      if (updateStrategy) {
-        updateStrategy.updateItem(item);
-        continue;
+      if (!updateStrategy) {
+        throw new Error(
+          `Unable to find a matching update strategy for ${item}`
+        );
       }
 
-      if (item.quality > 0) {
-        item.quality -= 1;
-      }
-
-      item.sellIn -= 1;
-      if (item.sellIn < 0) {
-        if (item.quality > 0) {
-          item.quality -= 1;
-        }
-      }
+      updateStrategy.updateItem(item);
     }
 
     return this.items;
