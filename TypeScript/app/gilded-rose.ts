@@ -25,16 +25,6 @@ interface ItemUpdateStrategy {
   updateItem(item: Item): void;
 }
 
-class LegendaryItemUpdateStrategy implements ItemUpdateStrategy {
-  isForItem(item: Item): boolean {
-    return item.name.startsWith("Sulfuras");
-  }
-
-  updateItem(item: Item): void {
-    // Nothing changes for legendary items.
-  }
-}
-
 /**
  * The list of supported item update strategies.
  *
@@ -43,7 +33,30 @@ class LegendaryItemUpdateStrategy implements ItemUpdateStrategy {
  * the same item. The first update strategy to return `true` will
  * be used for the item.
  */
-const ITEM_UPDATE_STRATEGIES = [new LegendaryItemUpdateStrategy()];
+const ITEM_UPDATE_STRATEGIES: ItemUpdateStrategy[] = [
+  // Legendary
+  {
+    isForItem: (item: Item): boolean => {
+      return item.name.startsWith("Sulfuras");
+    },
+    updateItem: (_item: Item): void => {
+      /* Do nothing */
+    },
+  },
+
+  // Aged Brie
+  {
+    isForItem: (item: Item): boolean => {
+      return item.name === "Aged Brie";
+    },
+    updateItem: (item: Item): void => {
+      item.sellIn--;
+      if (item.quality < 50) {
+        item.quality++;
+      }
+    },
+  },
+];
 
 export class GildedRose {
   items: Array<Item>;
@@ -62,10 +75,7 @@ export class GildedRose {
         continue;
       }
 
-      if (
-        item.name != "Aged Brie" &&
-        item.name != "Backstage passes to a TAFKAL80ETC concert"
-      ) {
+      if (item.name != "Backstage passes to a TAFKAL80ETC concert") {
         if (item.quality > 0) {
           item.quality -= 1;
         }
@@ -88,18 +98,12 @@ export class GildedRose {
       }
       item.sellIn -= 1;
       if (item.sellIn < 0) {
-        if (item.name != "Aged Brie") {
-          if (item.name != "Backstage passes to a TAFKAL80ETC concert") {
-            if (item.quality > 0) {
-              item.quality -= 1;
-            }
-          } else {
-            item.quality = 0;
+        if (item.name != "Backstage passes to a TAFKAL80ETC concert") {
+          if (item.quality > 0) {
+            item.quality -= 1;
           }
         } else {
-          if (item.quality < 50) {
-            item.quality += 1;
-          }
+          item.quality = 0;
         }
       }
     }
