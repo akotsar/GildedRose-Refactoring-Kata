@@ -152,6 +152,22 @@ describe("Gilded Rose", () => {
       }
     });
 
+    it("should not increase quality over 50", () => {
+      const sut = new GildedRose([
+        new Item("Backstage passes to a TAFKAL80ETC concert", 20, 48),
+        new Item("bar", 4, 8),
+      ]);
+      const expectedQualities = [
+        [49, 7],
+        [50, 6],
+        [50, 5],
+      ];
+      for (const expectedQuality of expectedQualities) {
+        const items = sut.updateQuality();
+        expect(items.map((i) => i.quality)).toEqual(expectedQuality);
+      }
+    });
+
     it("should increase quality by 2 when 10 days or less", () => {
       const sut = new GildedRose([
         new Item("Backstage passes to a TAFKAL80ETC concert", 11, 5),

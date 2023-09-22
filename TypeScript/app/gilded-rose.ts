@@ -1,3 +1,5 @@
+const MAX_ITEM_QUALITY = 50;
+
 export class Item {
   name: string;
   sellIn: number;
@@ -50,9 +52,33 @@ const ITEM_UPDATE_STRATEGIES: ItemUpdateStrategy[] = [
       return item.name === "Aged Brie";
     },
     updateItem: (item: Item): void => {
-      item.sellIn--;
-      if (item.quality < 50) {
-        item.quality++;
+      item.sellIn -= 1;
+      if (item.quality < MAX_ITEM_QUALITY) {
+        item.quality += 1;
+      }
+    },
+  },
+
+  // Backstage passes
+  {
+    isForItem: (item: Item): boolean => {
+      return item.name.startsWith("Backstage passes");
+    },
+    updateItem: (item: Item): void => {
+      item.sellIn -= 1;
+
+      if (item.sellIn < 0) {
+        item.quality = 0;
+      } else if (item.sellIn < 5) {
+        item.quality += 3;
+      } else if (item.sellIn < 10) {
+        item.quality += 2;
+      } else {
+        item.quality += 1;
+      }
+
+      if (item.quality > MAX_ITEM_QUALITY) {
+        item.quality = MAX_ITEM_QUALITY;
       }
     },
   },
@@ -75,35 +101,14 @@ export class GildedRose {
         continue;
       }
 
-      if (item.name != "Backstage passes to a TAFKAL80ETC concert") {
-        if (item.quality > 0) {
-          item.quality -= 1;
-        }
-      } else {
-        if (item.quality < 50) {
-          item.quality += 1;
-          if (item.name == "Backstage passes to a TAFKAL80ETC concert") {
-            if (item.sellIn < 11) {
-              if (item.quality < 50) {
-                item.quality += 1;
-              }
-            }
-            if (item.sellIn < 6) {
-              if (item.quality < 50) {
-                item.quality += 1;
-              }
-            }
-          }
-        }
+      if (item.quality > 0) {
+        item.quality -= 1;
       }
+
       item.sellIn -= 1;
       if (item.sellIn < 0) {
-        if (item.name != "Backstage passes to a TAFKAL80ETC concert") {
-          if (item.quality > 0) {
-            item.quality -= 1;
-          }
-        } else {
-          item.quality = 0;
+        if (item.quality > 0) {
+          item.quality -= 1;
         }
       }
     }
