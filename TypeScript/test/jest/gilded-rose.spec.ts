@@ -226,6 +226,27 @@ describe("Gilded Rose", () => {
     });
   });
 
+  describe("Conjured items", () => {
+    it("should decrease quality twice as fast", () => {
+      const sut = new GildedRose([
+        new Item("Conjured item", 2, 15),
+        new Item("bar", 10, 8),
+      ]);
+      const expectedQualities = [
+        [13, 7], // -2
+        [11, 6], // -2
+        [7, 5], // -4
+        [3, 4], // -4
+        [0, 3], // =0
+        [0, 2], // =0
+      ];
+      for (const expectedQuality of expectedQualities) {
+        const items = sut.updateQuality();
+        expect(items.map((i) => i.quality)).toEqual(expectedQuality);
+      }
+    });
+  });
+
   it("should throw when no matching update strategies", () => {
     jest
       .spyOn(ITEM_UPDATE_STRATEGIES.slice(-1)[0], "isForItem")

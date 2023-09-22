@@ -37,6 +37,7 @@ interface ItemUpdateStrategy {
  */
 export const ITEM_UPDATE_STRATEGIES: ItemUpdateStrategy[] = [
   // Legendary
+  // Never has to be sold or decreases in Quality.
   {
     isForItem: (item: Item): boolean => {
       return item.name.startsWith("Sulfuras");
@@ -47,6 +48,8 @@ export const ITEM_UPDATE_STRATEGIES: ItemUpdateStrategy[] = [
   },
 
   // Aged Brie
+  // Increases in Quality the older it gets
+  // - The Quality of an item is never more than 50
   {
     isForItem: (item: Item): boolean => {
       return item.name === "Aged Brie";
@@ -59,7 +62,12 @@ export const ITEM_UPDATE_STRATEGIES: ItemUpdateStrategy[] = [
     },
   },
 
-  // Backstage passes
+  // Backstage passes.
+  // Increases in Quality as its SellIn value approaches;
+  // - Quality increases by 2 when there are 10 days or less
+  //   and by 3 when there are 5 days or less but
+  // - Quality drops to 0 after the concert
+  // - The Quality of an item is never more than 50
   {
     isForItem: (item: Item): boolean => {
       return item.name.startsWith("Backstage passes");
@@ -79,6 +87,27 @@ export const ITEM_UPDATE_STRATEGIES: ItemUpdateStrategy[] = [
 
       if (item.quality > MAX_ITEM_QUALITY) {
         item.quality = MAX_ITEM_QUALITY;
+      }
+    },
+  },
+
+  // Conjured items
+  // Degrade in Quality twice as fast as normal items
+  {
+    isForItem: (item: Item): boolean => {
+      return item.name.startsWith("Conjured");
+    },
+    updateItem: (item: Item): void => {
+      item.sellIn -= 1;
+
+      if (item.sellIn < 0) {
+        item.quality -= 4;
+      } else {
+        item.quality -= 2;
+      }
+
+      if (item.quality < 0) {
+        item.quality = 0;
       }
     },
   },
